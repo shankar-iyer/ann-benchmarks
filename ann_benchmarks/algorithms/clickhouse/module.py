@@ -73,6 +73,16 @@ class clickhouse(BaseANN):
                 break
             if done == True:
                 break
+        # Setting available only in 25.8+
+        try:
+            if self.rescoring_optimization == True:
+                settings = "SET vector_search_with_rescoring = 0"
+            else:
+                settings = "SET vector_search_with_rescoring = 1"
+            self._chclient.query(settings)
+        except:
+            print("Rescoring optimization unavailable")
+
         return
 
     def set_query_arguments(self, ef_search, opt1, opt2):
@@ -82,12 +92,6 @@ class clickhouse(BaseANN):
 
     def query(self, v, n):
         ef_search_str = " SETTINGS enable_early_constant_folding=0, hnsw_candidate_list_size_for_search=" + str(self._ef_search)
-        '''  # Need to uncomment for version >= 25.8
-        if self.rescoring_optimization == True:
-            ef_search_str += ", vector_search_with_rescoring = 0"
-        else:
-            ef_search_str += ", vector_search_with_rescoring = 1"
-        ''' 
        
         if self.search_vector_in_binary == True:
             params = {'$v1binary$': v.tobytes() }
