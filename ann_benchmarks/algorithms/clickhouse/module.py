@@ -22,6 +22,12 @@ class clickhouse(BaseANN):
 
     def fit(self, X):
         subprocess.run(
+               "sudo sed -i 's/<level>trace<\/level>/<level>warning<\/level>/' /etc/clickhouse-server/config.xml",
+               shell=True,
+               check=True,
+               stdout=sys.stdout,
+               stderr=sys.stderr)
+        subprocess.run(
                "service clickhouse-server start",
                shell=True,
                check=True,
@@ -39,7 +45,7 @@ class clickhouse(BaseANN):
         self._dim = dim
         self._chclient.query('DROP TABLE IF EXISTS items_x')
         print("Fitting ...")
-        index_granularity = 64
+        index_granularity = 512
         create_table = 'CREATE TABLE items_x (id Int32, vector Array(Float32) CODEC(NONE))  ENGINE=MergeTree ORDER BY (id) SETTINGS  index_granularity=' + str(index_granularity)
         print(create_table)
         self._chclient.query(create_table);
@@ -89,6 +95,8 @@ class clickhouse(BaseANN):
             self._chclient.query(settings)
         except Exception as e:
             print("Rescoring optimization error : ", e)
+
+        self._chclient.query("SET log_queries = 0")
 
     def query(self, v, n):
         ef_search_str = " SETTINGS enable_early_constant_folding=0, hnsw_candidate_list_size_for_search=" + str(self._ef_search)
