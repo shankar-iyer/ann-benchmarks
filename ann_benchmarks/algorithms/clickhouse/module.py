@@ -125,7 +125,7 @@ class clickhouse(BaseANN):
     def batch_query(self, v, n):
         self._results_for_batch = [self.query(q, n) for q in v]
 
-    def get_batch_results(self, v, n):
+    def get_batch_results(self):
         return self._results_for_batch
 
     def get_memory_usage(self):
