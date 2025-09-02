@@ -122,6 +122,12 @@ class clickhouse(BaseANN):
             rows.append(f[0])
         return rows
 
+    def batch_query(self, v, n):
+        self._results_for_batch = [self.query(q, n) for q in v]
+
+    def get_batch_results(self, v, n):
+        return self._results_for_batch
+
     def get_memory_usage(self):
         if self._chclient is not None:
             # Load the index first
