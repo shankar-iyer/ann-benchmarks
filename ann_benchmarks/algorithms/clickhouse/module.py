@@ -40,7 +40,6 @@ class clickhouse(BaseANN):
             except:
                 time.sleep(1)
                 continue
-
         dim = X.shape[1]
         self._dim = dim
         self._chclient.query('DROP TABLE IF EXISTS items_x')
@@ -104,10 +103,10 @@ class clickhouse(BaseANN):
         if self.search_vector_in_binary == True:
             params = {'$v1binary$': v.tobytes() }
             if self._metric == "angular":
-                result = self._chclient.query("SELECT id FROM items_x ORDER BY cosineDistance(vector, (SELECT reinterpret($v1binary$, 'Array(Float32)') )) LIMIT " + str(n) + ef_search_str,
+                result = self._chclient.query("SELECT id FROM items_x ORDER BY cosineDistance(vector, reinterpret($v1binary$, 'Array(Float32)')) LIMIT " + str(n) + ef_search_str,
                                           parameters=params, settings = {'session_id':'session_annb'})
             else:
-                result = self._chclient.query("SELECT id FROM items_x ORDER BY L2Distance(vector, (SELECT reinterpret($v1binary$, 'Array(Float32)') )) LIMIT " + str(n) + ef_search_str,
+                result = self._chclient.query("SELECT id FROM items_x ORDER BY L2Distance(vector, reinterpret($v1binary$, 'Array(Float32)')) LIMIT " + str(n) + ef_search_str,
                                           parameters=params, settings={'session_id':'session_annb'})
         else:
             params = {'v1':list(v)}
